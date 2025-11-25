@@ -39,6 +39,6 @@ files_import_command:
     # set -x
     set -eu -o pipefail
     . .ddev/scripts/setup-environment-env-variables.sh ${environment:-production} ${strategy:-github}
-    rsync -az --delete --exclude '.gitignore' .ddev/.downloads/files/web/app/uploads/ web/app/uploads/
+    rsync -az --delete --exclude '.git*' .ddev/.downloads/files/web/app/uploads/ web/app/uploads/
     rm -rf .ddev/.downloads/files/web/app/uploads/
   service: host
