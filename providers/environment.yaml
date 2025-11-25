@@ -1,0 +1,44 @@
+#ddev-generated
+db_pull_command:
+  command: |
+    # set -x
+    set -eu -o pipefail
+    . .ddev/scripts/setup-environment-env-variables.sh ${environment:-production} ${strategy:-github}
+    (ssh -p ${ENVIRONMENT_SSH_PORT} ${ENVIRONMENT_SSH_USER}@${ENVIRONMENT_SSH_HOST} "cd ${ENVIRONMENT_APP_PATH} && bash -s" <<'ENDSSH'
+      # set -x
+      set -eu -o pipefail
+      DB_HOST=$(grep -v '^[[:space:]]*#' .env | grep DB_HOST | cut -d '=' -f2 | sed -e 's/^[[:space:]]*"\(.*\)"[[:space:]]*$/\1/' -e "s/^[[:space:]]*'\(.*\)'[[:space:]]*$/\1/")
+      DB_NAME=$(grep -v '^[[:space:]]*#' .env | grep DB_NAME | cut -d '=' -f2 | sed -e 's/^[[:space:]]*"\(.*\)"[[:space:]]*$/\1/' -e "s/^[[:space:]]*'\(.*\)'[[:space:]]*$/\1/")
+      DB_USERNAME=$(grep -v '^[[:space:]]*#' .env | grep DB_USER | cut -d '=' -f2 | sed -e 's/^[[:space:]]*"\(.*\)"[[:space:]]*$/\1/' -e "s/^[[:space:]]*'\(.*\)'[[:space:]]*$/\1/")
+      DB_PASSWORD=$(grep -v '^[[:space:]]*#' .env | grep DB_PASSWORD | cut -d '=' -f2 | sed -e 's/^[[:space:]]*"\(.*\)"[[:space:]]*$/\1/' -e "s/^[[:space:]]*'\(.*\)'[[:space:]]*$/\1/")
+      mysqldump --host=${DB_HOST} --port=3306 --user=${DB_USERNAME} --password=${DB_PASSWORD} ${DB_NAME}
+    ENDSSH
+    ) > .ddev/.downloads/db.sql
+  service: host
+
+db_import_command:
+  command: |
+    # set -x
+    set -eu -o pipefail
+    . .ddev/scripts/setup-environment-env-variables.sh ${environment:-production} ${strategy:-github}
+    ddev import-db --file=.ddev/.downloads/db.sql
+    ddev wp search-replace "${ENVIRONMENT_SITE_URL}" "${DDEV_PRIMARY_URL}"
+  service: host
+
+files_pull_command:
+  command: |
+    # set -x
+    set -eu -o pipefail
+    . .ddev/scripts/setup-environment-env-variables.sh ${environment:-production} ${strategy:-github}
+    mkdir -p .ddev/.downloads/files/web/app/uploads/
+    rsync -az --delete -e "ssh -p ${ENVIRONMENT_SSH_PORT}" ${ENVIRONMENT_SSH_USER}@${ENVIRONMENT_SSH_HOST}:${ENVIRONMENT_APP_PATH}web/app/uploads/ .ddev/.downloads/files/web/app/uploads/
+  service: host
+
+files_import_command:
+  command: |
+    # set -x
+    set -eu -o pipefail
+    . .ddev/scripts/setup-environment-env-variables.sh ${environment:-production} ${strategy:-github}
+    rsync -az --delete --exclude '.gitignore' .ddev/.downloads/files/web/app/uploads/ web/app/uploads/
+    rm -rf .ddev/.downloads/files/web/app/uploads/
+  service: host

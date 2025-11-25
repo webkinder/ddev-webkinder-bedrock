@@ -7,7 +7,7 @@
 
 ## Overview
 
-This add-on integrates Webkinder Bedrock into your [DDEV](https://ddev.com/) project.
+WEBKINDER specific customizations to Bedrock DDEV projects.
 
 ## Installation
 
@@ -20,28 +20,10 @@ After installation, make sure to commit the `.ddev` directory to version control
 
 ## Usage
 
-| Command | Description |
-| ------- | ----------- |
-| `ddev describe` | View service status and used ports for Webkinder Bedrock |
-| `ddev logs -s webkinder-bedrock` | Check Webkinder Bedrock logs |
-
-## Advanced Customization
-
-To change the Docker image:
-
-```bash
-ddev dotenv set .ddev/.env.webkinder-bedrock --webkinder-bedrock-docker-image="ddev/ddev-utilities:latest"
-ddev add-on get webkinder/ddev-webkinder-bedrock
-ddev restart
-```
-
-Make sure to commit the `.ddev/.env.webkinder-bedrock` file to version control.
-
-All customization options (use with caution):
-
-| Variable | Flag | Default |
-| -------- | ---- | ------- |
-| `WEBKINDER_BEDROCK_DOCKER_IMAGE` | `--webkinder-bedrock-docker-image` | `ddev/ddev-utilities:latest` |
+| Command               | Description                                      |
+| --------------------- | ------------------------------------------------ |
+| ddev pull environment | Pull DB and files (web/app/uploads) from environment |
+use *--environment="environment=beta,strategy=github"* for different environment and variable fetching strategies
 
 ## Credits
 
